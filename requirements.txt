@@ -1,0 +1,6 @@
+pandas
+streamlit
+pathway
+prophet
+transformers
+torch
