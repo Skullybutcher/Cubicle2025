@@ -4,3 +4,5 @@ pathway
 prophet
 transformers
 torch
+plotly
+watchdog
