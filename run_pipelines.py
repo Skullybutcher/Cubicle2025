@@ -133,7 +133,21 @@ def run_forecast_and_anomalies():
         forecast_all.rename(columns={"ds": "timestamp", "yhat": "forecast"}, inplace=True)
         forecast_all.to_csv("forecast.csv", index=False)
 
-        print(f"✅ forecast.csv updated ({len(forecast_all)} rows)")
+        # Enrich forecast with sales data to include quantity and price
+        if os.path.exists("sales.csv"):
+            sales_df = pd.read_csv("sales.csv", parse_dates=["timestamp"])
+            forecast_all["timestamp"] = pd.to_datetime(forecast_all["timestamp"], errors="coerce")
+            enriched = pd.merge_asof(
+                forecast_all.sort_values("timestamp"),
+                sales_df.sort_values("timestamp"),
+                by="sku",
+                on="timestamp",
+                direction="backward",
+                tolerance=pd.Timedelta("1h")
+    )
+    enriched.to_csv("forecast.csv", index=False)
+
+    print(f"✅ forecast.csv updated ({len(forecast_all)} rows)")
 
     # Anomalies
     if os.path.exists("anomaly_stats.csv") and os.path.exists("sales.csv"):
